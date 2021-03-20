@@ -1,0 +1,44 @@
+﻿@page "/getusers"
+<Auth />
+
+<h1>Users</h1>
+
+
+@if (model == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Active errands</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in model)
+            {
+                <tr>
+                    <td>@user.DisplayName</td>
+                    <td>@user.Email</td>
+                    <td></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<UserModel> model;
+
+    protected override async Task OnInitializedAsync()
+    {
+        model = new List<UserModel>();
+        model = await Http.GetFromJsonAsync<IEnumerable<UserModel>>("https://localhost:44315/api/Users");
+    }
+
+}
+

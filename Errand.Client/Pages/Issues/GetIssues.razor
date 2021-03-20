@@ -1,0 +1,183 @@
+﻿@page "/getissues"
+<Auth/>
+<link href="_content/Syncfusion.Blazor.Themes/bootstrap4.css" rel="stylesheet" />
+
+<h1>Issues</h1>
+
+<h4>Create a new Issue</h4>
+<div class="container row">
+    <EditForm Model="@issue" OnSubmit="@CreateIssueAsync">
+        <div id="customer-info">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Firstname" @bind="issue.CustomerFirstName" required />
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Lastname" @bind="issue.CustomerLastName" required />
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Email" @bind="issue.CustomerEmail" required />
+            </div>
+        </div>
+        <div id="errand-info">
+            <div class="form-group">
+                <textarea rows="4" cols="50" class="form-control" placeholder="Description" @bind="issue.Description" required />
+            </div>
+            <div class="form-group">
+                <select class="form-control selectpicker" @bind="issue.Category" required>
+                    <option selected disabled value="-1">--Category--</option>
+                    <option value="Internet"> Internet</option>
+                    <option value="Account"> Account</option>
+                    <option value="Software"> Software</option>
+                    <option value="Hardware"> Hardware</option>
+                    <option value="Installation"> Installation</option>
+                    <option value="Other"> Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <select class="form-control selectpicker" @bind="issue.Status" required>
+                    <option selected disabled value="-1">--Status--</option>
+                    <option value="Created"> Created</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <InputSelect id="user" @bind-Value="issue.AppUserId" class="form-control">
+                    <option selected disabled value="-1">--Choose a worker--</option>
+                    @foreach (var user in users)
+                    {
+                        <option value="@user.Id">@user.DisplayName</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-success">Create</button>
+        </div>
+    </EditForm>
+</div>
+
+<hr />
+
+@if (issues == null)
+{
+    <p>No errands found</p>
+}
+else
+{
+    @foreach (var issue in issues)
+    {
+        <SfAccordion Width="1000px">
+            <AccordionItems>
+                <AccordionItem>
+                    <HeaderTemplate>
+                        <div class="d-flex align-items-center">
+                            <div class="mr-5">@issue.DisplayName</div>
+                            <div class="mr-5">@issue.Category</div>
+                            <div class="mr-5">@issue.Status</div>
+                        </div>
+                    </HeaderTemplate>
+                    <ContentTemplate>
+                        <div class="container">
+                            <div class="row">
+                                <div class="column">
+                                    <div class="customer-info">
+                                        <div class="customer-details"><span>Firstname:</span> @issue.CustomerFirstName</div>
+                                        <div class="customer-details"><span>Lastname:</span> @issue.CustomerLastName</div>
+                                        <div class="customer-details"><span>Email:</span> @issue.CustomerEmail</div>
+                                    </div>
+                                    <div class="issue-info">
+                                        <div class="issue-details"><span>Assign to:</span> @issue.AppUser.DisplayName</div>
+                                        <div class="issue-details"><span>Created:</span> @issue.CreateDate</div>
+                                        <div class="issue-details"><span>Status:</span> @issue.Status</div>
+                                        <div class="issue-details"><span>Completed:</span> @issue.ResolveDate</div>
+
+                                        <div class="buttons">
+                                            <a href="/EditIssue/@issue.Id" class="btn btn-success w-25">Edit</a>
+                                            <a @onclick="(() => DeleteIssueAsync(issue.Id))" class="btn btn-danger w-25">Delete</a>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="column">
+                                    <label class="label" for="desc">Description</label>
+                                    <div id="desc">@issue.Description</div>
+                                </div>                                                
+                            </div>
+                        </div>
+                    </ContentTemplate>
+                </AccordionItem>
+            </AccordionItems>
+        </SfAccordion>
+    }
+}
+
+<style>
+
+    .customer-details{
+        margin-bottom:  0.5rem;
+    }
+
+    .issue-details {
+        margin-top: 0.5rem;
+    }
+
+    span{
+        font-weight: bold;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .row {
+        display: flex;
+    }
+    .column {
+        flex: 50%;
+    }
+
+    .buttons{
+        margin-top: 1rem;
+    }
+
+</style>
+
+
+@code {
+    private IEnumerable<IssuesModel> issues;
+    private CreateIssueModel issue;
+
+    public AppUser user { get; set; } = new AppUser();
+    public string AppUserId { get; set; }
+    public IEnumerable<AppUser> users { get; set; } = new List<AppUser>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        issue = new CreateIssueModel();
+
+        users = new List<AppUser>();
+        users = await Http.GetFromJsonAsync<IEnumerable<AppUser>>("https://localhost:44315/api/Users");
+
+
+        issues = new List<IssuesModel>();
+        await GetAllIssuesAsync();
+    }
+
+    public async Task GetAllIssuesAsync()
+    {
+        issues = await Http.GetFromJsonAsync<IEnumerable<IssuesModel>>("https://localhost:44315/api/Issues");
+    }
+
+    public async Task CreateIssueAsync()
+    {
+        await Http.PostAsJsonAsync<CreateIssueModel>("https://localhost:44315/api/Issues", issue);
+        issue = new CreateIssueModel();
+        await GetAllIssuesAsync();
+    }
+
+    public async Task DeleteIssueAsync(int id)
+    {
+        await Http.DeleteAsync($"https://localhost:44315/api/Issues/" + id);
+        await GetAllIssuesAsync();
+    }
+}

@@ -1,0 +1,93 @@
+﻿@page "/EditIssue/{Id:int}"
+@using Newtonsoft.Json
+
+<h3>Edit</h3>
+
+<div class="row">
+    <EditForm Model="@model" OnValidSubmit="@UppdateIssue">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+            <div class="form-group" required>
+                Category: <InputText id="category" @bind-Value="model.Category" class="form-control" required />
+            </div>
+            <div class="form-group" required>
+                Description: <textarea id="description" rows="4" cols="50" @bind="model.Description" class="form-control" required />
+            </div>
+            <div class="form-group">
+                Firstname: <InputText id="firstname" @bind-Value="model.CustomerFirstName" class="form-control" required />
+            </div>
+            <div class="form-group">
+                Lastname: <InputText id="lastname" @bind-Value="model.CustomerLastName" class="form-control" />
+            </div>
+            <div class="form-group">
+                Email: <InputText id="email" @bind-Value="model.CustomerEmail" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <select class="form-control selectpicker" @bind="model.Status" required>
+                    <option selected disabled value="-1">--Status--</option>
+                    <option value="Pending"> Pending</option>
+                    <option value="Active"> Active</option>
+                    <option value="Completed"> Completed</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <InputSelect id="serviceworker" @bind-Value="model.AppUserId" class="form-control selectpicker" required>
+                    <option selected disabled value="-1">--Serviceworker--</option>
+                    @foreach (var user in users)
+                    {
+                        <option value="@user.Id">@user.DisplayName</option>
+                    }
+                </InputSelect>
+            </div>
+
+        <br />
+
+        <button type="submit" class="btn btn-success">Update</button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+    public Issues issue = new Issues();
+    public IEnumerable<AppUser> users { get; set; } = new List<AppUser>();
+    public EditIssueModel model = new EditIssueModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id == null)
+        {
+            navigationManager.NavigateTo("GetIssues");
+        }
+        var response = await Http.GetAsync($"https://localhost:44315/api/Issues/{Id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var responseText = await response.Content.ReadAsStringAsync();
+            Issues issues = JsonConvert.DeserializeObject<Issues>(responseText);
+
+            users = new List<AppUser>();
+            users = await Http.GetFromJsonAsync<IEnumerable<AppUser>>("https://localhost:44315/api/Users");
+
+            model.Id = issues.Id;
+            model.Description = issues.Description;
+            model.Category = issues.Category;
+            model.Status = issues.Status;
+            model.CustomerFirstName = issues.CustomerFirstName;
+            model.CustomerLastName = issues.CustomerLastName;
+            model.CustomerEmail = issues.CustomerEmail;
+            model.ResolveDate = DateTime.Now;
+        }
+        else
+        {
+            navigationManager.NavigateTo("getissues");
+        }
+    }
+
+    private async Task UppdateIssue()
+    {
+        await Http.PutAsJsonAsync($"https://localhost:44315/api/Issues/{Id}", model);
+        navigationManager.NavigateTo("getissues");
+    }
+}

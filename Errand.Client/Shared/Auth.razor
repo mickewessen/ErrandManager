@@ -1,0 +1,15 @@
+﻿@code {
+    private string _accessToken { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _accessToken = await sessionStorage.GetItemAsync<string>("auth");
+        }
+        catch{ }
+
+        if (_accessToken == null)
+            navigationManager.NavigateTo("/login");
+    }
+}

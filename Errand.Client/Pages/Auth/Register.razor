@@ -1,0 +1,60 @@
+﻿@page "/register"
+@layout AuthLayout
+
+<div class="row">
+    <div class="col-12">
+        <h2>Register a new account</h2>
+        <EditForm Model="model" OnValidSubmit="RegisterUser">
+            <RadzenCard>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <label>First Name</label>
+                <RadzenTextBox @bind-Value="model.FirstName"></RadzenTextBox>
+
+                <label>Last Name</label>
+                <RadzenTextBox @bind-Value="model.LastName"></RadzenTextBox>
+
+                <label>Email</label>
+                <RadzenTextBox @bind-Value="model.Email"></RadzenTextBox>
+
+                <label>Password</label>
+                <RadzenPassword @bind-Value="model.Password"></RadzenPassword>
+
+                <hr />
+                <RadzenButton ButtonType="Radzen.ButtonType.Submit" Text="Register"
+                              ButtonStyle="Radzen.ButtonStyle.Primary" class="btn-block mr-2" />
+                <RadzenButton ButtonType="Radzen.ButtonType.Button" Text="Login"
+                              ButtonStyle="Radzen.ButtonStyle.Secondary" class="btn-block mr-2" Click="GoToLogin" />
+            </RadzenCard>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginModel model { get; set; }
+
+    public class LoginModel
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+
+    protected override void OnInitialized()
+    {
+        model = new LoginModel();
+    }
+
+    private async Task RegisterUser()
+    {
+        await Http.PostAsJsonAsync<LoginModel>("https://localhost:44315/api/authentication/signup", model);
+        navigationManager.NavigateTo("/login");
+    }
+    void GoToLogin()
+    {
+        navigationManager.NavigateTo("/login");
+    }
+
+}
