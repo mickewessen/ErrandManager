@@ -9,6 +9,7 @@ using Errand.Api.Data;
 using SharedLibraries.Models;
 using SharedLibraries.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Errand.Api.Services;
 
 namespace Errand.Api.Controllers
 {
@@ -17,20 +18,22 @@ namespace Errand.Api.Controllers
     public class IssuesController : ControllerBase
     {
         private readonly SqlDbContext _context;
+        private readonly ISearchService _services;
 
-        public IssuesController(SqlDbContext context)
+        public IssuesController(SqlDbContext context, ISearchService services)
         {
             _context = context;
+            _services = services;
         }
 
-        // GET: api/Issues
+        // GET: All Issues
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Issues>>> GetIssues()
         {
             return await _context.Errands.Include(i => i.AppUser).ToListAsync();
         }
 
-        // GET: api/Issues/5
+        // GET: Issues by Id
         [HttpGet("{id}")]
         public async Task<ActionResult<Issues>> GetIssues(int id)
         {
@@ -44,8 +47,69 @@ namespace Errand.Api.Controllers
             return issues;
         }
 
-        // PUT: api/Issues/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //Search by Status
+        [HttpGet("searchstatus/{status}")]
+        public async Task<ActionResult<Issues>> SearchStatus(string status)
+        {
+            try
+            {
+                var result = await _services.SearchStatusAsync(status);
+
+                if (result.Any())
+                {
+                    return Ok(result);
+                }
+
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error retrieving data from the database");
+            }
+        }
+
+        //Seach by customers firstname
+        [HttpGet("searchcustomer/{firstname}")]
+        public async Task<ActionResult<Issues>> SearchCustomer(string firstname)
+        {
+            try
+            {
+                var result = await _services.SearchCustomerAsync(firstname);
+
+                if (result.Any())
+                {
+                    return Ok(result);
+                }
+
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error retrieving data from the database");
+            }
+        }
+
+        //Seach by created date
+        [HttpGet("searchcreateddate/{created}")]
+        public async Task<ActionResult<Issues>> SearchCreatedDate(string created)
+        {
+            try
+            {
+                var result = await _services.SearchCreatedDateAsync(created);
+
+                return Ok(result);
+
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error retrieving data from the database");
+            }
+        }
+
+        // PUT: Edit Issue by Id
         [HttpPut("{id}")]
         public async Task<IActionResult> PutIssues(int id, EditIssueModel model)
         {
@@ -90,8 +154,7 @@ namespace Errand.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/Issues
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: Create Issues
         [HttpPost]
         public async Task<ActionResult<Issues>> PostIssues(CreateIssueModel model)
         {
@@ -113,7 +176,7 @@ namespace Errand.Api.Controllers
             return CreatedAtAction("GetIssues", new { id = issue.Id }, issue);
         }
 
-        // DELETE: api/Issues/5
+        // DELETE: Delete Issues
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteIssues(int id)
         {
@@ -133,5 +196,7 @@ namespace Errand.Api.Controllers
         {
             return _context.Errands.Any(e => e.Id == id);
         }
+
+
     }
 }

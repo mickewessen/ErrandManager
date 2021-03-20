@@ -27,7 +27,7 @@ namespace Errand.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUser>>> GetAppUsers()
         {
-            return await _context.AppUsers.ToListAsync();
+            return await _context.AppUsers.Include(a =>a.Errands).ToListAsync();
         }
 
         // GET: api/Users/5
