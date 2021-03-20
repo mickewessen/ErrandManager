@@ -1,38 +1,37 @@
 ﻿@page "/getusers"
+<link href="_content/Syncfusion.Blazor.Themes/bootstrap4.css" rel="stylesheet" />
 <Auth />
 
-<h1>Users</h1>
+<div class="container">
+    <h1>Users</h1>
 
 
-@if (model == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Active errands</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in model)
-            {
-                <tr>
-                    <td>@user.DisplayName</td>
-                    <td>@user.Email</td>
-                    <td></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    @if (model == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div class="control-section" style="justify-content:center">
+            <div class="row">
+                <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                    @foreach (var user in model)
+                    {
+                    <div class="mb-3">
+                        <SfCard>
+                            <CardHeader Title="@user.DisplayName" SubTitle=@user.Email />
+                            <CardContent Content="Active Issues"/>
+                        </SfCard>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
 @code {
-    private IEnumerable<UserModel> model;
+private IEnumerable<UserModel> model;
 
     protected override async Task OnInitializedAsync()
     {

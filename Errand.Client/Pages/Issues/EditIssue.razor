@@ -13,7 +13,7 @@
                 Category: <InputText id="category" @bind-Value="model.Category" class="form-control" required />
             </div>
             <div class="form-group" required>
-                Description: <textarea id="description" rows="4" cols="50" @bind="model.Description" class="form-control" required />
+                Description: <textarea id="description" rows="6" cols="50" @bind="model.Description" class="form-control" required />
             </div>
             <div class="form-group">
                 Firstname: <InputText id="firstname" @bind-Value="model.CustomerFirstName" class="form-control" required />
@@ -43,8 +43,12 @@
             </div>
 
         <br />
+        <div>
+            <button type="submit" class="btn btn-success">Update</button>
+            <a href="/getissues" class="btn btn-primary">Cancel</a>
+        </div>
+        
 
-        <button type="submit" class="btn btn-success">Update</button>
     </EditForm>
 </div>
 

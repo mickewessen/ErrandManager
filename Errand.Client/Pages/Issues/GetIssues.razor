@@ -17,7 +17,7 @@
             <div class="form-group">
                 <input type="text" class="form-control" placeholder="Email" @bind="issue.CustomerEmail" required />
             </div>
-        </div>
+        </div> 
         <div id="errand-info">
             <div class="form-group">
                 <textarea rows="4" cols="50" class="form-control" placeholder="Description" @bind="issue.Description" required />
@@ -85,6 +85,7 @@ else
                                         <div class="customer-details"><span>Lastname:</span> @issue.CustomerLastName</div>
                                         <div class="customer-details"><span>Email:</span> @issue.CustomerEmail</div>
                                     </div>
+                                    <br />
                                     <div class="issue-info">
                                         <div class="issue-details"><span>Assign to:</span> @issue.AppUser.DisplayName</div>
                                         <div class="issue-details"><span>Created:</span> @issue.CreateDate</div>
@@ -92,10 +93,8 @@ else
                                         <div class="issue-details"><span>Completed:</span> @issue.ResolveDate</div>
 
                                         <div class="buttons">
-                                            <a href="/EditIssue/@issue.Id" class="btn btn-success w-25">Edit</a>
-                                            <a @onclick="(() => DeleteIssueAsync(issue.Id))" class="btn btn-danger w-25">Delete</a>
+                                            <a href="/EditIssue/@issue.Id" class="btn btn-success w-25">Edit</a> | <a @onclick="(() => DeleteIssueAsync(issue.Id))" class="btn btn-danger w-25">Delete</a>
                                         </div>
-
                                     </div>
                                 </div>
                                 <div class="column">
@@ -156,8 +155,7 @@ else
         issue = new CreateIssueModel();
 
         users = new List<AppUser>();
-        users = await Http.GetFromJsonAsync<IEnumerable<AppUser>>("https://localhost:44315/api/Users");
-
+        await GetAllUsersAsync();
 
         issues = new List<IssuesModel>();
         await GetAllIssuesAsync();
@@ -166,6 +164,11 @@ else
     public async Task GetAllIssuesAsync()
     {
         issues = await Http.GetFromJsonAsync<IEnumerable<IssuesModel>>("https://localhost:44315/api/Issues");
+    }
+
+    public async Task GetAllUsersAsync()
+    {
+        users = await Http.GetFromJsonAsync<IEnumerable<AppUser>>("https://localhost:44315/api/Users");
     }
 
     public async Task CreateIssueAsync()
